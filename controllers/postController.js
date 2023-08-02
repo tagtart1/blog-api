@@ -4,10 +4,10 @@ const Post = require("../models/post");
 const jwt = require("jsonwebtoken");
 
 // GET all psots
-exports.getPosts = (req, res) => {
-  res.status(200).json({
-    message: "HEY from posts_get",
-  });
+exports.getPosts = async (req, res) => {
+  const posts = await Post.find({});
+
+  res.status(200).json(posts);
 };
 
 exports.postPosts = [
