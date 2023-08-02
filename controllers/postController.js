@@ -1,6 +1,7 @@
 const { body, validationResult } = require("express-validator");
 const asyncHandler = require("express-async-handler");
 const Post = require("../models/post");
+const jwt = require("jsonwebtoken");
 
 // GET all psots
 exports.getPosts = (req, res) => {
@@ -22,19 +23,27 @@ exports.postPosts = [
     // Extract errors
     const errors = validationResult(req);
 
-    const newPost = new Post({
+    const newPost = {
       title: req.body.title,
       text: req.body.text,
       author: "testID",
+    };
+
+    jwt.verify(req.token, "secretkey", (err, authData) => {
+      if (err) {
+        return res.status(403).json({ message: "Invalid permissions" });
+      } else {
+        newPost.author = authData.user._id;
+      }
     });
 
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.mapped() });
     } else {
-      await newPost.save();
+      const post = await new Post(newPost).save();
 
       return res.status(200).json({
-        post: newPost,
+        post: post,
       });
     }
   }),

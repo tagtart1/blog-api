@@ -5,6 +5,7 @@ var logger = require("morgan");
 require("dotenv").config();
 
 const postRouter = require("./routes/posts");
+const authRouter = require("./routes/auth");
 
 var app = express();
 
@@ -26,11 +27,12 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/api/posts", postRouter);
+app.use("/api", authRouter);
 
 // error handler
 app.use(function (err, req, res, next) {
   // set locals, only providing error in development
-  res.json(err);
+  res.status(400).json(err);
 });
 
 module.exports = app;
