@@ -4,12 +4,27 @@ const Post = require("../models/post");
 const jwt = require("jsonwebtoken");
 
 // GET all psots
-exports.getPosts = async (req, res) => {
+exports.getPosts = asyncHandler(async (req, res) => {
   const posts = await Post.find({});
 
   res.status(200).json(posts);
+});
+
+// GET specific post
+exports.getPostById = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) {
+      throw new Error();
+    }
+
+    return res.status(200).json(post);
+  } catch {
+    return res.status(400).json({ message: "No results found" });
+  }
 };
 
+// POST new post
 exports.postPosts = [
   body("title", "Must include a title").trim().isLength({ min: 1 }).escape(),
   body("text")
@@ -48,3 +63,25 @@ exports.postPosts = [
     }
   }),
 ];
+
+// DELETE post
+exports.deletePost = async (req, res) => {
+  jwt.verify(req.token, "secretkey", async (err, authData) => {
+    if (err) {
+      return res.status(403).json({ message: "Invalid permissions" });
+    }
+    try {
+      const toDeleteDoc = await Post.findById(req.params.id);
+      if (!toDeleteDoc)
+        return res.status(404).json({ err: "Post does not exist" });
+
+      if (toDeleteDoc.author.toString() !== authData.user._id.toString())
+        return res.status(403).json({ err: "Cannot delete post" });
+
+      const deleted = await Post.findByIdAndDelete(req.params.id);
+      res.status(200).json(deleted);
+    } catch {
+      res.status(400).json({ err: "Post does not exist" });
+    }
+  });
+};

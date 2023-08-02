@@ -16,7 +16,7 @@ const run = async () => {
 
   bcrypt.hash(process.env.TESTPW, 10, async (err, hashedPassword) => {
     const newUser = new User({
-      username: "tagtart",
+      username: "tagtart2",
       password: hashedPassword,
     });
 
