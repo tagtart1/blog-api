@@ -3,12 +3,22 @@ const asyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 
 exports.postLogin = asyncHandler(async (req, res) => {
-  const user = await User.findOne({ username: "tagtart2" });
+  const user = await User.findOne({ username: req.body.username });
   // Authenticate later
 
-  jwt.sign({ user: user }, "secretkey", (err, token) => {
-    res.json({
-      token: token,
-    });
-  });
+  const userInfo = {
+    username: user.username,
+    id: user._id,
+  };
+
+  jwt.sign(
+    { user: userInfo },
+    "secretkey",
+    { expiresIn: "3h" },
+    (err, token) => {
+      res.json({
+        token: token,
+      });
+    }
+  );
 });

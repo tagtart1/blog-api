@@ -48,7 +48,7 @@ exports.postPosts = [
       if (err) {
         return res.status(403).json({ message: "Invalid permissions" });
       } else {
-        newPost.author = authData.user._id;
+        newPost.author = authData.user.id;
       }
     });
 
@@ -75,7 +75,7 @@ exports.deletePost = async (req, res) => {
       if (!toDeleteDoc)
         return res.status(404).json({ err: "Post does not exist" });
 
-      if (toDeleteDoc.author.toString() !== authData.user._id.toString())
+      if (toDeleteDoc.author.toString() !== authData.user.id)
         return res.status(403).json({ err: "Cannot delete post" });
 
       const deleted = await Post.findByIdAndDelete(req.params.id);
@@ -85,3 +85,49 @@ exports.deletePost = async (req, res) => {
     }
   });
 };
+
+// UPDATE psot
+exports.updatePost = [
+  body("title", "Must include a title").trim().isLength({ min: 1 }).escape(),
+  body("text")
+    .trim()
+    .isLength({ min: 1 })
+    .withMessage("You can't post an empty blog post!")
+    .isLength({ max: 1500 })
+    .withMessage("That is way too long for a blog post!")
+    .escape(),
+  asyncHandler(async (req, res) => {
+    // Extract errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.mapped() });
+    }
+
+    const update = {
+      title: req.body.title,
+      text: req.body.text,
+    };
+
+    jwt.verify(req.token, "secretkey", async (err, authData) => {
+      if (err) {
+        return res.status(403).json({ message: "Invalid permissions" });
+      }
+
+      const updatedPostFinal = await Post.findOneAndUpdate(
+        { _id: req.params.id, author: authData.user.id },
+        update,
+        { new: true }
+      );
+
+      if (!updatedPostFinal) {
+        return res
+          .status(403)
+          .json({ message: "You cannot edit some one else's post!" });
+      }
+
+      return res.status(200).json({
+        post: updatedPostFinal,
+      });
+    });
+  }),
+];
