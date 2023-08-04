@@ -32,7 +32,18 @@ exports.postComment = [
     const comment = {
       author: req.body.author,
       text: req.body.text,
+      parentPost: req.params.postId,
     };
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: mapped() });
+    } else {
+      const newComment = await new Comment(comment).save();
+
+      return res.status(200).json({
+        comment: newComment,
+      });
+    }
   }),
 ];
 
