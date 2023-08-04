@@ -6,6 +6,7 @@ require("dotenv").config();
 
 const postRouter = require("./routes/posts");
 const authRouter = require("./routes/auth");
+const commentRouter = require("./routes/comment");
 
 var app = express();
 
@@ -27,6 +28,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/api/posts", postRouter);
+app.use("/api/:postId/comments", commentRouter);
 app.use("/api", authRouter);
 
 // error handler
