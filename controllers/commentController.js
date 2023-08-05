@@ -60,7 +60,8 @@ exports.deleteComment = async (req, res) => {
     }
 
     try {
-      const parentPost = await Post.findById(req.params.id, { author: 1 });
+      const parentPost = await Post.findById(req.params.postId);
+
       // Ensure comment exists
       if (parentPost.author.toString() !== authData.user.id.toString()) {
         return res.status(403).json({
@@ -82,9 +83,7 @@ exports.deleteComment = async (req, res) => {
         comment: deletedComment,
       });
     } catch (err) {
-      res
-        .status(400)
-        .json({ err: "You can only delete comments under your own posts3" });
+      res.status(400).json({ err: err.message });
     }
   });
 };

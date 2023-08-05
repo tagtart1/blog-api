@@ -9,3 +9,8 @@ Content-Type: application/json
     "text": "Second comment ever!",
     "author": "Jimmy2"
 }
+
+###
+
+DELETE http://localhost:3000/api/posts/64caf95e27ce9f5be8b1b9d1/comments/64cd9d9da47a7e40e5f1c281  HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJuYW1lIjoidGFndGFydDIiLCJpZCI6IjY0Y2E5ZmM2NjUxMTc2YmQ5ZjhjMDIyOSJ9LCJpYXQiOjE2OTExOTc5NTUsImV4cCI6MTY5MTIwODc1NX0.II67G36bt1BgA6oKL0rS8Mxm71ubAtCDwzqpsNqZl_Y
