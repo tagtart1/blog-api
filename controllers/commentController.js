@@ -1,13 +1,19 @@
 const asyncHandler = require("express-async-handler");
 const { body, validationResult } = require("express-validator");
 const Comment = require("../models/comment");
+const Post = require("../models/post");
 const jwt = require("jsonwebtoken");
 
 exports.getComments = asyncHandler(async (req, res) => {
   const comments = await Comment.find({ parentPost: req.params.postId });
 
+  if (comments.length === 0) {
+    return res.status(404).json({
+      message: "No comments yet",
+    });
+  }
+
   res.status(200).json(comments);
-  l;
 });
 
 exports.postComment = [
@@ -36,7 +42,7 @@ exports.postComment = [
     };
 
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: mapped() });
+      return res.status(400).json({ errors: errors.mapped() });
     } else {
       const newComment = await new Comment(comment).save();
 
@@ -47,8 +53,40 @@ exports.postComment = [
   }),
 ];
 
-exports.deleteComment = (req, res) => {
-  res.send("WIP");
+exports.deleteComment = async (req, res) => {
+  jwt.verify(req.token, "secretkey", async (err, authData) => {
+    if (err) {
+      return res.status(403).json({ message: "Invalid permissions" });
+    }
+
+    try {
+      const parentPost = await Post.findById(req.params.id, { author: 1 });
+      // Ensure comment exists
+      if (parentPost.author.toString() !== authData.user.id.toString()) {
+        return res.status(403).json({
+          message: "You can only delete comments under your own posts1",
+        });
+      }
+
+      const deletedComment = await Comment.findByIdAndDelete(
+        req.params.commentId
+      );
+
+      if (!deletedComment) {
+        return res.status(403).json({
+          message: "You can only delete comments under your own posts2",
+        });
+      }
+
+      res.status(200).json({
+        comment: deletedComment,
+      });
+    } catch (err) {
+      res
+        .status(400)
+        .json({ err: "You can only delete comments under your own posts3" });
+    }
+  });
 };
 
 exports.updateComment = (req, res) => {

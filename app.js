@@ -28,7 +28,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/api/posts", postRouter);
-app.use("/api/:postId/comments", commentRouter);
+app.use("/api/posts/:postId/comments", commentRouter);
 app.use("/api", authRouter);
 
 // error handler
