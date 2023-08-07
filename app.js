@@ -3,6 +3,7 @@ var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 require("dotenv").config();
+const cors = require("cors");
 
 const postRouter = require("./routes/posts");
 const authRouter = require("./routes/auth");
@@ -26,6 +27,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+app.use(cors());
 
 app.use("/api/posts", postRouter);
 app.use("/api/posts/:postId/comments", commentRouter);
