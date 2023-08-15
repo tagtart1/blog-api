@@ -5,7 +5,9 @@ const jwt = require("jsonwebtoken");
 
 // GET all psots
 exports.getPosts = asyncHandler(async (req, res) => {
-  const posts = await Post.find({});
+  const posts = await Post.find({})
+    .sort({ timestamp: -1 })
+    .populate("author", "username");
 
   res.status(200).json(posts);
 });
@@ -20,7 +22,7 @@ exports.getPostById = async (req, res) => {
 
     return res.status(200).json(post);
   } catch {
-    return res.status(400).json({ message: "No results found" });
+    return res.status(404).json({ message: "No results found" });
   }
 };
 
