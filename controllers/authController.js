@@ -20,6 +20,7 @@ exports.postLogin = asyncHandler(async (req, res) => {
         res.cookie("token", token, {
           httpOnly: true,
           maxAge: 10800000,
+          path: "/",
         });
 
         res.json({
@@ -33,4 +34,19 @@ exports.postLogin = asyncHandler(async (req, res) => {
       message: "Invalid credentials",
     });
   }
+});
+
+exports.validateUser = asyncHandler(async (req, res) => {
+  const token = req.cookies.token;
+  console.log(req.cookies);
+
+  jwt.verify(token, "secretkey", (err, userData) => {
+    if (err) {
+      return res
+        .status(403)
+        .json({ message: "User time out, please log back in" });
+    } else {
+      return res.json({ success: true, data: userData });
+    }
+  });
 });

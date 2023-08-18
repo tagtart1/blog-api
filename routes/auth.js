@@ -6,4 +6,6 @@ var router = express.Router();
 
 router.post("/login", authController.postLogin);
 
+router.get("/validate-user", authController.validateUser);
+
 module.exports = router;
