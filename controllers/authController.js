@@ -50,3 +50,8 @@ exports.validateUser = asyncHandler(async (req, res) => {
     }
   });
 });
+
+exports.postLogout = (req, res) => {
+  res.clearCookie("token", { path: "/" });
+  res.json({ message: "Logged out successfully" });
+};

@@ -5,9 +5,19 @@ const jwt = require("jsonwebtoken");
 
 // GET all psots
 exports.getPosts = asyncHandler(async (req, res) => {
-  const posts = await Post.find({})
-    .sort({ timestamp: -1 })
-    .populate("author", "username");
+  const userId = req.query.userId;
+
+  let posts = {};
+
+  if (userId) {
+    posts = await Post.find({ author: userId })
+      .sort({ timestamp: -1 })
+      .populate("author", "username");
+  } else {
+    posts = await Post.find({})
+      .sort({ timestamp: -1 })
+      .populate("author", "username");
+  }
 
   res.status(200).json(posts);
 });
