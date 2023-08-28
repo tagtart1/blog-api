@@ -8,6 +8,7 @@ const PostSchema = new Schema({
   text: { type: String },
   timestamp: { type: Date, default: Date.now() },
   author: { type: Schema.Types.ObjectId, ref: "User" },
+  isDraft: { type: Boolean },
 });
 
 PostSchema.virtual("formattedDate").get(function () {

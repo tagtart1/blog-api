@@ -53,7 +53,7 @@ exports.postPosts = [
     const newPost = {
       title: req.body.title,
       text: req.body.text,
-      author: "testID",
+      isDraft: req.body.isDraft,
     };
 
     jwt.verify(req.token, "secretkey", (err, authData) => {
