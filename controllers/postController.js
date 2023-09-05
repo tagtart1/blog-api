@@ -130,6 +130,7 @@ exports.updatePost = [
     const update = {
       title: req.body.title,
       text: req.body.text,
+      isDraft: req.body.isDraft,
     };
 
     jwt.verify(req.token, "secretkey", async (err, authData) => {
