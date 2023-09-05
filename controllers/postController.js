@@ -24,7 +24,9 @@ exports.getPosts = asyncHandler(async (req, res) => {
         .populate("author", "username");
     }
   } else {
-    posts = await Post.find({})
+    posts = await Post.find({
+      $or: [{ isDraft: false }, { isDraft: { $exists: false } }],
+    })
       .sort({ timestamp: -1 })
       .populate("author", "username");
   }
