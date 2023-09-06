@@ -14,7 +14,7 @@ exports.postLogin = asyncHandler(async (req, res) => {
 
     jwt.sign(
       { user: userInfo },
-      "secretkey",
+      process.env.SECRETKEY,
       { expiresIn: "3h" },
       (err, token) => {
         res.cookie("token", token, {
@@ -40,7 +40,7 @@ exports.validateUser = asyncHandler(async (req, res) => {
   const token = req.cookies.token;
   console.log(req.cookies);
 
-  jwt.verify(token, "secretkey", (err, userData) => {
+  jwt.verify(token, process.env.SECRETKEY, (err, userData) => {
     if (err) {
       return res
         .status(403)

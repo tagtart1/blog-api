@@ -54,7 +54,7 @@ exports.postComment = [
 ];
 
 exports.deleteComment = async (req, res) => {
-  jwt.verify(req.token, "secretkey", async (err, authData) => {
+  jwt.verify(req.token, process.env.SECRETKEY, async (err, authData) => {
     if (err) {
       return res.status(403).json({ message: "Invalid permissions" });
     }

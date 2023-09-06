@@ -68,7 +68,7 @@ exports.postPosts = [
       isDraft: req.body.isDraft,
     };
 
-    jwt.verify(req.token, "secretkey", (err, authData) => {
+    jwt.verify(req.token, process.env.SECRETKEY, (err, authData) => {
       if (err) {
         return res.status(403).json({ message: "Invalid permissions" });
       } else {
@@ -90,7 +90,7 @@ exports.postPosts = [
 
 // DELETE post
 exports.deletePost = async (req, res) => {
-  jwt.verify(req.token, "secretkey", async (err, authData) => {
+  jwt.verify(req.token, process.env.SECRETKEY, async (err, authData) => {
     if (err) {
       return res.status(403).json({ message: "Invalid permissions" });
     }
@@ -133,7 +133,7 @@ exports.updatePost = [
       isDraft: req.body.isDraft,
     };
 
-    jwt.verify(req.token, "secretkey", async (err, authData) => {
+    jwt.verify(req.token, process.env.SECRETKEY, async (err, authData) => {
       if (err) {
         return res.status(403).json({ message: "Invalid permissions" });
       }
