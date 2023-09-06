@@ -13,21 +13,21 @@ exports.getPosts = asyncHandler(async (req, res) => {
   if (userId) {
     if (onlyDrafts) {
       posts = await Post.find({ author: userId, isDraft: true })
-        .sort({ timestamp: -1 })
+        .sort({ createdTimestamp: -1 })
         .populate("author", "username");
     } else {
       posts = await Post.find({
         author: userId,
         $or: [{ isDraft: false }, { isDraft: { $exists: false } }],
       })
-        .sort({ timestamp: -1 })
+        .sort({ createdTimestamp: -1 })
         .populate("author", "username");
     }
   } else {
     posts = await Post.find({
       $or: [{ isDraft: false }, { isDraft: { $exists: false } }],
     })
-      .sort({ timestamp: -1 })
+      .sort({ createdTimestamp: -1 })
       .populate("author", "username");
   }
 
