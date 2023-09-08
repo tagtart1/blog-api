@@ -1,12 +1,18 @@
 const User = require("../models/user");
 const asyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 
 exports.postLogin = asyncHandler(async (req, res) => {
   try {
     const user = await User.findOne({ username: req.body.username });
-    // Authenticate later
+    // Authenticate password
 
+    const result = await bcrypt.compare(req.body.password, user.password);
+    console.log(result);
+    if (!result) {
+      res.status(401).json({ message: "Invalid credentials v1" });
+    }
     const userInfo = {
       username: user.username,
       id: user._id,
