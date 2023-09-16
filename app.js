@@ -8,6 +8,7 @@ const cors = require("cors");
 const postRouter = require("./routes/posts");
 const authRouter = require("./routes/auth");
 const commentRouter = require("./routes/comment");
+const draftRouter = require("./routes/drafts");
 
 var app = express();
 
@@ -36,6 +37,7 @@ app.use(
 );
 
 app.use("/api/posts", postRouter);
+app.use("/api/drafts", draftRouter);
 app.use("/api/posts/:postId/comments", commentRouter);
 app.use("/api", authRouter);
 
