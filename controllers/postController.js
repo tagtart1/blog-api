@@ -6,23 +6,16 @@ const jwt = require("jsonwebtoken");
 // GET all psots
 exports.getPosts = asyncHandler(async (req, res) => {
   const userId = req.query.user_id;
-  const onlyDrafts = req.query.only_drafts;
+
   let posts = {};
 
-  //Should later seperate the concerns of getting a users private posts over the public get all posts api
   if (userId) {
-    if (onlyDrafts) {
-      posts = await Post.find({ author: userId, isDraft: true })
-        .sort({ createdTimestamp: -1 })
-        .populate("author", "username");
-    } else {
-      posts = await Post.find({
-        author: userId,
-        $or: [{ isDraft: false }, { isDraft: { $exists: false } }],
-      })
-        .sort({ createdTimestamp: -1 })
-        .populate("author", "username");
-    }
+    posts = await Post.find({
+      author: userId,
+      $or: [{ isDraft: false }, { isDraft: { $exists: false } }],
+    })
+      .sort({ createdTimestamp: -1 })
+      .populate("author", "username");
   } else {
     posts = await Post.find({
       $or: [{ isDraft: false }, { isDraft: { $exists: false } }],
