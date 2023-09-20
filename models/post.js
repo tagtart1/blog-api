@@ -7,6 +7,7 @@ const PostSchema = new Schema({
   title: { type: String },
   text: { type: String },
   createdTimestamp: { type: Date, default: Date.now() },
+  lastUpdatedTimestamp: { type: Date, required: false },
   author: { type: Schema.Types.ObjectId, ref: "User" },
   isDraft: { type: Boolean },
 });

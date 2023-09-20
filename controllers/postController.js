@@ -124,6 +124,7 @@ exports.updatePost = [
       title: req.body.title,
       text: req.body.text,
       isDraft: req.body.isDraft,
+      lastUpdatedTimestamp: Date.now(),
     };
 
     jwt.verify(req.token, process.env.SECRETKEY, async (err, authData) => {
