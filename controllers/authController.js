@@ -99,7 +99,9 @@ exports.postSignUp = [
   asyncHandler(async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      res.status(401).json({ data: { errors: errors } });
+      const formattedErrors = errors.array().map((err) => err.msg);
+
+      throw new AppError(formattedErrors, 400, "VALIDATION_ERROR");
     }
 
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
@@ -130,7 +132,6 @@ exports.postSignUp = [
         });
 
         res.json({
-          success: true,
           data: userInfo,
         });
       }
