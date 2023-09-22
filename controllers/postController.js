@@ -2,6 +2,7 @@ const { body, validationResult } = require("express-validator");
 const asyncHandler = require("express-async-handler");
 const Post = require("../models/post");
 const jwt = require("jsonwebtoken");
+const AppError = require("../utils/appError");
 
 // GET all psots
 exports.getPosts = asyncHandler(async (req, res) => {
@@ -24,22 +25,18 @@ exports.getPosts = asyncHandler(async (req, res) => {
       .populate("author", "username");
   }
 
-  res.status(200).json(posts);
+  res.status(200).json({ data: posts });
 });
 
 // GET specific post
-exports.getPostById = async (req, res) => {
-  try {
-    const post = await Post.findById(req.params.id);
-    if (!post) {
-      throw new Error();
-    }
-
-    return res.status(200).json(post);
-  } catch {
-    return res.status(404).json({ message: "No results found" });
+exports.getPostById = asyncHandler(async (req, res) => {
+  const post = await Post.findById(req.params.id);
+  if (!post) {
+    throw new AppError("Post not found", 404, "NOT_FOUND");
   }
-};
+
+  return res.status(200).json({ data: post });
+});
 
 // POST new post
 exports.postPosts = [
@@ -63,7 +60,11 @@ exports.postPosts = [
 
     jwt.verify(req.token, process.env.SECRETKEY, (err, authData) => {
       if (err) {
-        return res.status(403).json({ message: "Invalid permissions" });
+        throw new AppError(
+          "Session timed out, pleae sign back in",
+          401,
+          "TIMED_OUT"
+        );
       } else {
         newPost.author = authData.user.id;
       }
@@ -75,33 +76,33 @@ exports.postPosts = [
       const post = await new Post(newPost).save();
 
       return res.status(200).json({
-        post: post,
+        data: post,
       });
     }
   }),
 ];
 
 // DELETE post
-exports.deletePost = async (req, res) => {
+exports.deletePost = asyncHandler(async (req, res) => {
   jwt.verify(req.token, process.env.SECRETKEY, async (err, authData) => {
     if (err) {
-      return res.status(403).json({ message: "Invalid permissions" });
+      throw new AppError(
+        "Session timed out, pleae sign back in",
+        401,
+        "TIMED_OUT"
+      );
     }
-    try {
-      const toDeleteDoc = await Post.findById(req.params.id);
-      if (!toDeleteDoc)
-        return res.status(404).json({ err: "Post does not exist" });
 
-      if (toDeleteDoc.author.toString() !== authData.user.id)
-        return res.status(403).json({ err: "Cannot delete post" });
+    const toDeleteDoc = await Post.findById(req.params.id);
+    if (!toDeleteDoc) throw new AppError("Post not found", 404, "NOT_FOUND");
 
-      const deleted = await Post.findByIdAndDelete(req.params.id);
-      res.status(200).json(deleted);
-    } catch {
-      res.status(400).json({ err: "Post does not exist" });
-    }
+    if (toDeleteDoc.author.toString() !== authData.user.id)
+      throw new AppError("Invalid permissions", 403, "INVALID_CREDENTIALS");
+
+    const deleted = await Post.findByIdAndDelete(req.params.id);
+    res.status(200).json({ data: deleted });
   });
-};
+});
 
 // UPDATE psot
 exports.updatePost = [
@@ -129,7 +130,11 @@ exports.updatePost = [
 
     jwt.verify(req.token, process.env.SECRETKEY, async (err, authData) => {
       if (err) {
-        return res.status(403).json({ message: "Invalid permissions" });
+        throw new AppError(
+          "Session timed out, pleae sign back in",
+          401,
+          "TIMED_OUT"
+        );
       }
 
       const updatedPostFinal = await Post.findOneAndUpdate(
@@ -139,13 +144,11 @@ exports.updatePost = [
       );
 
       if (!updatedPostFinal) {
-        return res
-          .status(403)
-          .json({ message: "You cannot edit some one else's post!" });
+        throw new AppError("Invalid permissions", 403, "INVALID_CREDENTIALS");
       }
 
       return res.status(200).json({
-        post: updatedPostFinal,
+        data: updatedPostFinal,
       });
     });
   }),

@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { body, validationResult } = require("express-validator");
 
+// LOG IN POST
 exports.postLogin = asyncHandler(async (req, res, next) => {
   if (!req.body.password || !req.body.username) {
     throw new AppError(
@@ -15,11 +16,19 @@ exports.postLogin = asyncHandler(async (req, res, next) => {
     );
   }
 
+  // Find user by username
   const user = await User.findOne({ username: req.body.username });
-  // Authenticate password
+  if (!user) {
+    throw new AppError(
+      "The username or password provided is incorrect",
+      401,
+      "INVALID_CREDENTIALS"
+    );
+  }
 
+  // Authenticate password
   const result = await bcrypt.compare(req.body.password, user.password);
-  console.log(result);
+
   if (!result) {
     throw new AppError(
       "The username or password provided is incorrect",
@@ -48,31 +57,32 @@ exports.postLogin = asyncHandler(async (req, res, next) => {
       });
 
       res.json({
-        success: true,
         data: userInfo,
       });
     }
   );
 });
 
+// VALIDATE USER ENSURES THE TOKEN IS VALID AND RETURNS THE userData
 exports.validateUser = asyncHandler(async (req, res) => {
   const token = req.cookies.token;
-  console.log("verifying user ");
 
   jwt.verify(token, process.env.SECRETKEY, (err, userData) => {
     if (err) {
-      return res
-        .status(403)
-        .json({ message: "User time out, please log back in" });
+      throw new AppError(
+        "User timed out, please log back in",
+        401,
+        "TIMED_OUT"
+      );
     } else {
-      return res.json({ success: true, data: userData });
+      return res.json({ data: userData });
     }
   });
 });
 
 exports.postLogout = (req, res) => {
   res.clearCookie("token", { path: "/" });
-  res.json({ message: "Logged out successfully" });
+  res.json({ data: { message: "Logged out successfully" } });
 };
 
 exports.postSignUp = [
@@ -86,16 +96,13 @@ exports.postSignUp = [
     .withMessage(
       "Password should have at least one uppercase letter, one number, and one special character"
     ),
-  async (req, res) => {
+  asyncHandler(async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      res.status(401).json({ message: errors });
+      res.status(401).json({ data: { errors: errors } });
     }
 
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    if (!hashedPassword) {
-      res.status(401).json({ message: "Error signing up" });
-    }
 
     const newUser = new User({
       username: req.body.username,
@@ -114,6 +121,8 @@ exports.postSignUp = [
       process.env.SECRETKEY,
       { expiresIn: "3h" },
       (err, token) => {
+        if (err) return next(err);
+
         res.cookie("token", token, {
           httpOnly: true,
           maxAge: 10800000,
@@ -126,5 +135,5 @@ exports.postSignUp = [
         });
       }
     );
-  },
+  }),
 ];
