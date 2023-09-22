@@ -25,7 +25,7 @@ exports.getPosts = asyncHandler(async (req, res) => {
       .populate("author", "username");
   }
 
-  res.status(200).json({ data: posts });
+  res.status(200).json({ data: { posts: posts } });
 });
 
 // GET specific post
@@ -35,7 +35,7 @@ exports.getPostById = asyncHandler(async (req, res) => {
     throw new AppError("Post not found", 404, "NOT_FOUND");
   }
 
-  return res.status(200).json({ data: post });
+  return res.status(200).json({ data: { post: post } });
 });
 
 // POST new post

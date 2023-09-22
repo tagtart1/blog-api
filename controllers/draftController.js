@@ -18,6 +18,6 @@ exports.getDrafts = asyncHandler(async (req, res) => {
       .sort({ createdTimestamp: -1 })
       .populate("author", "username");
 
-    return res.status(200).json({ data: posts });
+    return res.status(200).json({ data: { drafts: posts } });
   });
 });
