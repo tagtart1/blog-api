@@ -1,51 +1,63 @@
 const User = require("../models/user");
+const AppError = require("../utils/appError");
+
 const asyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { body, validationResult } = require("express-validator");
 
-exports.postLogin = asyncHandler(async (req, res) => {
-  try {
-    const user = await User.findOne({ username: req.body.username });
-    // Authenticate password
-
-    const result = await bcrypt.compare(req.body.password, user.password);
-    console.log(result);
-    if (!result) {
-      res.status(401).json({ message: "Invalid credentials v1" });
-    }
-    const userInfo = {
-      username: user.username,
-      id: user._id,
-    };
-
-    jwt.sign(
-      { user: userInfo },
-      process.env.SECRETKEY,
-      { expiresIn: "3h" },
-      (err, token) => {
-        res.cookie("token", token, {
-          httpOnly: true,
-          maxAge: 10800000,
-          path: "/",
-        });
-
-        res.json({
-          success: true,
-          data: userInfo,
-        });
-      }
+exports.postLogin = asyncHandler(async (req, res, next) => {
+  if (!req.body.password || !req.body.username) {
+    throw new AppError(
+      "The username or password provided is incorrect",
+      401,
+      "INVALID_CREDENTIALS"
     );
-  } catch (err) {
-    res.status(401).json({
-      message: "Invalid credentials",
-    });
   }
+
+  const user = await User.findOne({ username: req.body.username });
+  // Authenticate password
+
+  const result = await bcrypt.compare(req.body.password, user.password);
+  console.log(result);
+  if (!result) {
+    throw new AppError(
+      "The username or password provided is incorrect",
+      401,
+      "INVALID_CREDENTIALS"
+    );
+  }
+  const userInfo = {
+    username: user.username,
+    id: user._id,
+  };
+
+  jwt.sign(
+    { user: userInfo },
+    process.env.SECRETKEY,
+    { expiresIn: "3h" },
+    (err, token) => {
+      if (err) {
+        next(err);
+      }
+
+      res.cookie("token", token, {
+        httpOnly: true,
+        maxAge: 10800000,
+        path: "/",
+      });
+
+      res.json({
+        success: true,
+        data: userInfo,
+      });
+    }
+  );
 });
 
 exports.validateUser = asyncHandler(async (req, res) => {
   const token = req.cookies.token;
-  console.log(req.cookies);
+  console.log("verifying user ");
 
   jwt.verify(token, process.env.SECRETKEY, (err, userData) => {
     if (err) {

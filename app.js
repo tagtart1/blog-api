@@ -4,6 +4,7 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 require("dotenv").config();
 const cors = require("cors");
+const AppError = require("./utils/appError");
 
 const postRouter = require("./routes/posts");
 const authRouter = require("./routes/auth");
@@ -42,9 +43,19 @@ app.use("/api/posts/:postId/comments", commentRouter);
 app.use("/api", authRouter);
 
 // error handler
-app.use(function (err, req, res, next) {
-  // set locals, only providing error in development
-  res.status(400).json(err);
+app.use((err, req, res, next) => {
+  if (err instanceof AppError && err.isOperational) {
+    // Handle operational errors by returning a specific error message to the client.
+    return res
+      .status(err.statusCode)
+      .json({ code: err.code, message: err.message });
+  }
+
+  // Handle other unknown errors.
+  console.error("An unknown error occurred:", err);
+  res
+    .status(500)
+    .json({ code: "UNKNOWN", message: "An unexpected error occurred" });
 });
 
 module.exports = app;

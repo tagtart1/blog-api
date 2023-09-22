@@ -1,7 +1,7 @@
-const User = require("./models/user");
+const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 require("dotenv").config();
-const Post = require("./models/post");
+const Post = require("../models/post");
 
 const run = async () => {
   // Set up mongoose connection
