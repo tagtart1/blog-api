@@ -3,6 +3,7 @@ const asyncHandler = require("express-async-handler");
 const Post = require("../models/post");
 const jwt = require("jsonwebtoken");
 const AppError = require("../utils/appError");
+const mongoose = require("mongoose");
 
 // GET all psots
 exports.getPosts = asyncHandler(async (req, res) => {
@@ -30,6 +31,12 @@ exports.getPosts = asyncHandler(async (req, res) => {
 
 // GET specific post
 exports.getPostById = asyncHandler(async (req, res) => {
+  // Override the cast error
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    throw new AppError("Post not found", 404, "NOT_FOUND");
+  }
+
+  // Find post in database
   const post = await Post.findById(req.params.id);
   if (!post) {
     throw new AppError("Post not found", 404, "NOT_FOUND");
@@ -118,7 +125,9 @@ exports.updatePost = [
     // Extract errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.mapped() });
+      const formattedErrors = errors.array().map((err) => err.msg);
+
+      throw new AppError(formattedErrors, 400, "VALIDATION_ERROR");
     }
 
     const update = {

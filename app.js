@@ -56,7 +56,7 @@ app.use((err, req, res, next) => {
   console.error("An unknown error occurred:", err);
   res
     .status(500)
-    .json({ code: "UNKNOWN", message: "An unexpected error occurred" });
+    .json({ code: "UNKNOWN", messages: ["An unexpected error occurred"] });
 });
 
 module.exports = app;
