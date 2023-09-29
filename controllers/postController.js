@@ -77,8 +77,10 @@ exports.postPosts = [
       }
     });
 
+    // Validation errors
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.mapped() });
+      const formattedErrors = errors.array().map((err) => err.msg);
+      throw new AppError(formattedErrors, 400, "VALIDATION_ERROR");
     } else {
       const post = await new Post(newPost).save();
 
